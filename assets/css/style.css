@@ -1,0 +1,147 @@
+/* assets/css/style.css */
+.shutter-customizer-form {
+  width: 100%;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.shutter-customizer-form-title,
+.price-section-title {
+  margin: 0 auto;
+}
+
+.measurement-section {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.form-row {
+  margin-bottom: 15px;
+  flex: 1;
+}
+
+.form-row label {
+  display: block;
+  margin-bottom: 12px !important;
+  font-weight: bold;
+}
+
+.form-row input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 18px;
+}
+
+.invalid-feedback {
+  width: fit-content;
+  background-color: #f8e7e8;
+  color: #dc3545;
+  font-size: 14px;
+  display: none;
+  padding: 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.total-area-container,
+.calculated-price-container {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+#total_area,
+#calculated_price {
+  font-size: 18px;
+}
+
+#calculated_price {
+  font-weight: bold;
+  color: #c07a17;
+}
+
+.price-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.frame-title,
+.color-title {
+  margin-bottom: 10px !important    ;
+  font-size: 20px !important;
+}
+
+.frame-options {
+  display: flex;
+  gap: 20px;
+  max-width: 500px;
+}
+
+.frame-option {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.frame-option.selected {
+  border-color: #c07a17;
+}
+
+.frame-option.selected span {
+  color: #c07a17;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .frame-options {
+    flex-direction: column;
+  }
+  .form-row input {
+    width: 100%;
+  }
+}
+
+.color-options {
+  display: flex;
+  gap: 10px;
+}
+
+.color-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-option.selected {
+  border-color: #c07a17;
+}
+
+.color-option.selected span {
+  color: #c07a17;
+  font-weight: bold;
+}
+
+.color-option-preview {
+  width: 200px;
+  height: 200px;
+  border-radius: 4px;
+}

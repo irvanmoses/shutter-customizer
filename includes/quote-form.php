@@ -21,9 +21,9 @@ function shutter_customizer_quote_form()
 
     // Data Warna (contoh)
     $colors = array(
-        'white' => 'White',
-        'beige' => 'Beige',
-        'brown' => 'Brown',
+        'white' => array('color' => '#f7f8fa', 'label' => 'White'),
+        'beige' => array('color' => '#FFF0DB', 'label' => 'Beige'),
+        'brown' => array('color' => '#8C6F4F', 'label' => 'Brown'),
     );
 
 ?>
@@ -183,11 +183,11 @@ function shutter_customizer_quote_form()
                 <div class="form-section">
                     <h3>Color Options</h3>
                     <div class="color-options">
-                        <?php foreach ($colors as $color_key => $color_name) : ?>
+                        <?php foreach ($colors as $value => $color) : ?>
                             <label class="color-option">
-                                <input type="radio" name="quote_color" value="<?php echo esc_attr($color_key); ?>" required>
-                                <span class="color-box" style="background-color: <?php echo esc_attr($color_key); ?>;"></span>
-                                <span><?php echo esc_html($color_name); ?></span>
+                                <input type="radio" name="quote_color" value="<?php echo esc_attr($color['label']); ?>" required>
+                                <span class="color-box" style="background-color: <?php echo esc_attr($color['color']); ?>; width:80px; height:80px; display:block;"></span>
+                                <span><?php echo esc_html($color['label']); ?></span>
                             </label>
                         <?php endforeach; ?>
                     </div>
@@ -228,54 +228,55 @@ function shutter_customizer_quote_form()
 function process_shutter_customizer_quote_form()
 {
     if (isset($_POST['action']) && $_POST['action'] == 'calculate_shutter_quote') {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'shutter_quotes';
+
         // Ambil data dari form
+        $user_id     = get_current_user_id();
         $window_name = sanitize_text_field($_POST['quote_window_name']);
         $width       = intval($_POST['quote_width']);
         $height      = intval($_POST['quote_height']);
         $frame       = sanitize_text_field($_POST['quote_frame']);
         $color       = sanitize_text_field($_POST['quote_color']);
+        $layout      = sanitize_text_field($_POST['quote_layout']);
+        $recess      = sanitize_text_field($_POST['quote_recess']);
 
-        // Data Frames (untuk kalkulasi harga)
-        $frames = array(
-            'standard' => array(
-                'name' => 'Standard Frame',
-                'price' => 0,
+        // Kalkulasi Harga (ganti dengan logika Anda)
+        $area = ($width * $height) / 1000000;
+        $price_per_sqm = 100;
+        $frame_price = 0; // Ambil dari data frame
+        $total_price = ($area * $price_per_sqm) + $frame_price;
+
+        // Masukkan data ke database
+        $wpdb->insert(
+            $table_name,
+            array(
+                'user_id'     => $user_id,
+                'window_name' => $window_name,
+                'width'       => $width,
+                'height'      => $height,
+                'frame'       => $frame,
+                'color'       => $color,
+                'layout'      => $layout,
+                'recess'      => $recess,
+                'total_price' => $total_price,
             ),
-            'premium' => array(
-                'name' => 'Premium Frame (+$50)',
-                'price' => 50,
-            ),
+            array(
+                '%d',   // user_id
+                '%s',   // window_name
+                '%d',   // width
+                '%d',   // height
+                '%s',   // frame
+                '%s',   // color
+                '%s',   // layout
+                '%s',   // recess
+                '%f'    // total_price
+            )
         );
 
-        // Kalkulasi Area
-        $area = ($width * $height) / 1000000; // Konversi mm ke m^2
-        $area = number_format($area, 2); // Format ke 2 desimal
+        $quote_id = $wpdb->insert_id; // ID quote yang baru dibuat
 
-        // Kalkulasi Harga (contoh)
-        $price_per_sqm = 100; // Harga dasar per meter persegi
-        $frame_price   = $frames[$frame]['price']; // Harga frame yang dipilih
-        $total_price   = ($area * $price_per_sqm) + $frame_price;
-        $total_price   = number_format($total_price, 2); // Format ke 2 desimal
-
-        // Kirim email
-        $to = get_option('admin_email');
-        $subject = 'Quote Window Shutter Baru';
-        $body = "
-            Detail Quote:
-            Window Name: {$window_name}
-            Lebar: {$width} mm
-            Tinggi: {$height} mm
-            Frame: {$frames[$frame]['name']}
-            Warna: {$color}
-            Total Area: {$area} m²
-
-            Total Harga: \${$total_price}
-        ";
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-
-        wp_mail($to, $subject, $body, $headers);
-
-        echo '<p>Terima kasih! Quote telah dikirim ke admin.</p>';
+        echo '<p>Thank You! Quote has been saved with ID: ' . $quote_id . '</p>'; // Ganti dengan redirect
     }
 }
 

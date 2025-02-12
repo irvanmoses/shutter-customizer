@@ -35,6 +35,9 @@ class ShutterCustomizer
 
         // Enqueue necessary scripts and styles
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+
+        // Admin menu
+        add_action('admin_menu', array($this, 'shutter_customizer_admin_menu'));
     }
 
 
@@ -94,6 +97,71 @@ class ShutterCustomizer
         }
     }
 
+    // Fungsi untuk membuat tabel saat plugin diaktifkan
+    public function shutter_customizer_activate()
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'shutter_quotes';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        user_id int(11) DEFAULT NULL,
+        window_name varchar(255) DEFAULT NULL,
+        width int(11) DEFAULT NULL,
+        height int(11) DEFAULT NULL,
+        frame varchar(255) DEFAULT NULL,
+        color varchar(255) DEFAULT NULL,
+        layout varchar(255) DEFAULT NULL,
+        recess varchar(255) DEFAULT NULL,
+        total_price decimal(10,2) DEFAULT NULL,
+        status varchar(255) DEFAULT 'pending',
+        date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+    }
+
+    public function shutter_customizer_admin_menu()
+    {
+        add_menu_page(
+            'Shutter Quotes',
+            'Shutter Quotes',
+            'manage_options',
+            'shutter-quotes',
+            array($this, 'shutter_quotes_page')
+        );
+    }
+
+    public function shutter_quotes_page()
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'shutter_quotes';
+
+        $quotes = $wpdb->get_results("SELECT * FROM $table_name");
+
+        echo '<div class="wrap">';
+        echo '<h1>Shutter Quotes</h1>';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>ID</th><th>Window Name</th><th>Width</th><th>Height</th><th>Total Price</th><th>Date</th></tr></thead>';
+        echo '<tbody>';
+        foreach ($quotes as $quote) {
+            echo '<tr>';
+            echo '<td>' . esc_html($quote->id) . '</td>';
+            echo '<td>' . esc_html($quote->window_name) . '</td>';
+            echo '<td>' . esc_html($quote->width) . '</td>';
+            echo '<td>' . esc_html($quote->height) . '</td>';
+            echo '<td>' . esc_html($quote->total_price) . '</td>';
+            echo '<td>' . esc_html($quote->date_created) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
+        echo '</div>';
+    }
+
     public function display_customizer_form()
     {
         // Only show form on shutter products
@@ -140,7 +208,6 @@ class ShutterCustomizer
             }
         }
     }
-
 
     public function add_form_data_to_cart($cart_item_data, $product_id, $variation_id)
     {
@@ -215,6 +282,9 @@ class ShutterCustomizer
         }
     }
 }
+
+// Register Hook
+register_activation_hook(__FILE__, 'shutter_customizer_activate');
 
 // Initialize the plugin
 new ShutterCustomizer();

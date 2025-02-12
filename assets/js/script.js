@@ -10,7 +10,7 @@ jQuery(document).ready(function ($) {
   const colorInput = $("#shutter_color");
 
   $.ajax({
-    url: shutter_ajax_params.ajax_url,
+    url: shutterData.ajax_url,
     type: "POST",
     data: {
       action: "load_shutter_form",
@@ -26,12 +26,12 @@ jQuery(document).ready(function ($) {
           // ... (mengumpulkan data formulir)
 
           $.ajax({
-            url: shutter_ajax_params.ajax_url,
+            url: shutterData.ajax_url,
             type: "POST",
             data: {
               action: "process_shutter_form",
               // ... (data formulir)
-              nonce: shutter_ajax_params.nonce,
+              nonce: shutterData.nonce,
             },
             success: function (response) {
               // ... (menangani respon)

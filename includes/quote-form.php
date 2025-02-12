@@ -107,11 +107,11 @@ function shutter_customizer_quote_form()
                     <div class="layout-options">
                         <label class="layout-option">
                             <input type="radio" name="quote_layout" value="layout1" required>
-                            <img src="<?php echo plugin_dir_url(__FILE__) . 'assets/images/layout1.png'; ?>" alt="Layout 1">
+                            <img src="" alt="Layout 1">
                         </label>
                         <label class="layout-option">
                             <input type="radio" name="quote_layout" value="layout2" required>
-                            <img src="<?php echo plugin_dir_url(__FILE__) . 'assets/images/layout2.png'; ?>" alt="Layout 2">
+                            <img src="" alt="Layout 2">
                         </label>
                         <label class="layout-option">
                             <input type="radio" name="quote_layout" value="upload" required>

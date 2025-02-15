@@ -86,6 +86,17 @@ class ShutterCustomizer
 
             // Enqueue Script
             wp_enqueue_script('shutter-quote-script', plugin_dir_url(__FILE__) . '../assets/js/quote-script.js', array('jquery'), null, true);
+
+            // Pass AJAX data to JavaScript for quote form
+            wp_localize_script(
+                'shutter-quote-script', // Handle yang harus sesuai
+                'shutter_ajax_params',
+                array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('shutter_nonce'),
+                    'home_url' => home_url(),
+                )
+            );
         }
     }
 
@@ -95,6 +106,29 @@ class ShutterCustomizer
         global $wpdb;
         $table_name = $wpdb->prefix . 'shutter_quotes';
         $charset_collate = $wpdb->get_charset_collate();
+
+        $column_exists_panes = $wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE 'panes'");
+        $column_exists_recess_depth = $wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE 'recess_depth'");
+
+        if (is_null($column_exists_panes)) {
+            // Tambahkan kolom 'panes' jika belum ada
+            $sql = "ALTER TABLE $table_name ADD `panes` INT(11) DEFAULT NULL";
+            $wpdb->query($sql);
+
+            if (!empty($wpdb->last_error)) {
+                error_log('Error adding column `panes`: ' . $wpdb->last_error);
+            }
+        }
+
+        if (is_null($column_exists_recess_depth)) {
+            // Tambahkan kolom 'recess_depth' jika belum ada
+            $sql = "ALTER TABLE $table_name ADD `recess_depth` VARCHAR(255) DEFAULT NULL";
+            $wpdb->query($sql);
+
+            if (!empty($wpdb->last_error)) {
+                error_log('Error adding column `recess_depth`: ' . $wpdb->last_error);
+            }
+        }
 
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id int(11) NOT NULL AUTO_INCREMENT,
@@ -109,10 +143,17 @@ class ShutterCustomizer
         total_price decimal(10,2) DEFAULT NULL,
         status varchar(255) DEFAULT 'pending',
         date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+         panes VARCHAR(255) DEFAULT NULL,
+        recess_depth VARCHAR(255) DEFAULT NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Periksa jika terjadi error
+        if (! empty($wpdb->last_error)) {
+            error_log('Error creating table: ' . $wpdb->last_error);
+        }
     }
 }

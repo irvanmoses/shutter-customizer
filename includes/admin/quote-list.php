@@ -22,8 +22,10 @@ echo '<thead><tr>
         <th>Width</th>
         <th>Height</th>
         <th>Panes</th>
+        <th>Layout</th>
         <th>Recess</th>
         <th>Recess Depth</th>
+        <th>Color</th>
         <th>Total Price</th>
         <th>Date</th>
         </tr></thead>'; // Added new table headers
@@ -35,8 +37,10 @@ foreach ($quotes as $quote) {
     echo '<td>' . esc_html($quote->width) . '</td>';
     echo '<td>' . esc_html($quote->height) . '</td>';
     echo '<td>' . esc_html($quote->panes) . '</td>'; // Added new table data
+    echo '<td>' . esc_html($quote->layout) . '</td>'; // Added new table data
     echo '<td>' . esc_html($quote->recess) . '</td>'; // Added new table data
     echo '<td>' . esc_html($quote->recess_depth) . '</td>'; // Added new table data
+    echo '<td>' . esc_html($quote->color) . '</td>'; // Added new table data
     echo '<td>' . esc_html($quote->total_price) . '</td>';
     echo '<td>' . esc_html($quote->date_created) . '</td>';
     echo '</tr>';

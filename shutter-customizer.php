@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: Shutter Customizer
- * Description: Custom form for shutter measurements and options
+ * Description: Custom form for shutter customization and options
  * Version: 1.0.0
  * Author: Framewrks
  */

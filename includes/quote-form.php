@@ -1,11 +1,11 @@
 <?php
 
-// Fungsi untuk menampilkan form quote
+// Function to display form quote
 function shutter_customizer_quote_form()
 {
     ob_start();
 
-    // Data Frames (contoh)
+    // Data Frames
     $frames = array(
         'standard' => array(
             'name' => 'Standard Frame',
@@ -19,7 +19,7 @@ function shutter_customizer_quote_form()
         ),
     );
 
-    // Data Warna (contoh)
+    // Data Color
     $colors = array(
         'white' => array('color' => '#f7f8fa', 'label' => 'White'),
         'beige' => array('color' => '#FFF0DB', 'label' => 'Beige'),
@@ -47,7 +47,7 @@ function shutter_customizer_quote_form()
                 <h2 class="step-title">Size</h2>
                 <div class="form-row">
                     <label for="quote_window_name">Window Name:</label>
-                    <input type="text" id="quote_window_name" name="quote_window_name" placeholder="ex. Living Room">
+                    <input type="text" id="quote_window_name" name="quote_window_name" placeholder="ex. Living Room" required>
                 </div>
 
                 <div class="form-row">
@@ -138,6 +138,10 @@ function shutter_customizer_quote_form()
                             <input type="radio" name="quote_recess" value="no" required>
                             <span>NO</span>
                         </label>
+                        <label class="recess-option">
+                            <input type="radio" name="quote_recess" value="idk" required>
+                            <span>I don't know</span>
+                        </label>
                     </div>
                 </div>
 
@@ -181,16 +185,7 @@ function shutter_customizer_quote_form()
             <div class="form-step" data-step="5">
                 <h2 class="step-title">Color</h2>
                 <div class="form-section">
-                    <h3>Color Options</h3>
                     <div class="color-options">
-                        <?php /* foreach ($colors as $value => $color) : ?>
-                            <label class="color-option">
-                                <input type="radio" name="quote_color" value="<?php echo esc_attr($color['label']); ?>" required>
-                                <span class="color-box" style="background-color: <?php echo esc_attr($color['color']); ?>; width:80px; height:80px; display:block;"></span>
-                                <span><?php echo esc_html($color['label']); ?></span>
-                            </label>
-                        <?php endforeach; */ ?>
-
                         <?php foreach ($colors as $value => $color) : ?>
                             <div class="color-option" data-value="<?php echo esc_attr($value); ?>">
                                 <div class="color-option-preview" style="background-color: <?php echo esc_attr($color['color']); ?>;"></div>
@@ -233,15 +228,15 @@ function shutter_customizer_quote_form()
 }
 
 
-// Fungsi untuk memproses data form (digunakan oleh AJAX dan non-AJAX)
+// Function to proceed form data (used by AJAX and non-AJAX)
 function process_shutter_form_data($post_data)
 {
-    // Periksa nonce (hanya jika ada)
+    // Check nonce (if exist)
     if (isset($post_data['nonce']) && ! wp_verify_nonce($post_data['nonce'], 'shutter_nonce')) {
         return new WP_Error('invalid_nonce', 'Invalid nonce.');
     }
 
-    // Ambil data dari form
+    // Get data from form
     $window_name  = isset($post_data['quote_window_name']) ? sanitize_text_field($post_data['quote_window_name']) : '';
     $width        = isset($post_data['quote_width']) ? intval($post_data['quote_width']) : 0;
     $height       = isset($post_data['quote_height']) ? intval($post_data['quote_height']) : 0;
@@ -280,9 +275,9 @@ function process_shutter_form_data($post_data)
     // Validasi Data
     $errors = array();
 
-    // ... Kode Validasi Lain ...
+    // ... Another validation codes ...
 
-    // Validasi recess depth (hanya jika recess diisi "yes")
+    // Validate recess depth (only if recess is set to "yes")
     if ($recess === 'yes') {
         $allowed_recess_depth = array('yes', 'no', 'idk');
         if (!in_array($recess_depth, $allowed_recess_depth)) {
@@ -290,7 +285,7 @@ function process_shutter_form_data($post_data)
         }
     }
 
-    // Validasi panes
+    // Validate panes
     $allowed_panes = array('1', '2', '3', '4', '+');
     if (!in_array($panes, $allowed_panes)) {
         $errors[] = 'Invalid number of panes selected.';
@@ -300,13 +295,13 @@ function process_shutter_form_data($post_data)
         return new WP_Error('validation_error', implode('<br>', $errors));
     }
 
-    // Kalkulasi Harga
+    // Calculate price
     $area = ($width * $height) / 1000000;
     $price_per_sqm = 100;
     $frame_price = 0;
     $total_price = ($area * $price_per_sqm) + $frame_price;
 
-    // Simpan Data ke Database
+    // Save to database
     global $wpdb;
     $table_name = $wpdb->prefix . 'shutter_quotes';
 
@@ -349,24 +344,24 @@ function process_shutter_form_data($post_data)
     return $quote_id;
 }
 
-// Fungsi untuk memproses form quote (non-AJAX)
+// Function to proceed form quote (non-AJAX)
 function process_shutter_customizer_quote_form()
 {
     if (isset($_POST['action']) && $_POST['action'] == 'calculate_shutter_quote') {
         $result = process_shutter_form_data($_POST);
 
         if (is_wp_error($result)) {
-            // Tampilkan pesan error
+            // Show error message
             echo '<div class="error">' . $result->get_error_message() . '</div>';
         } else {
-            // Tampilkan pesan sukses
+            // Show success message
             echo '<div class="success">Quote submitted successfully! Quote ID: ' . $result . '</div>';
         }
     }
 }
 add_action('init', 'process_shutter_customizer_quote_form');
 
-// Fungsi untuk menangani AJAX (proses data AJAX)
+// Function to handle AJAX (AJAX data processing)
 add_action('wp_ajax_process_shutter_form', 'process_shutter_form_callback');
 add_action('wp_ajax_nopriv_process_shutter_form', 'process_shutter_form_callback');
 

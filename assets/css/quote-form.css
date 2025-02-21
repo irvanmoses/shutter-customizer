@@ -67,6 +67,11 @@
   margin-bottom: 5px;
 }
 
+.form-row.error input,
+.form-row.error select {
+  border: 1px solid red;
+}
+
 .shutter-customizer-form .form-row input[type="text"],
 .shutter-customizer-form .form-row input[type="number"],
 .shutter-customizer-form .form-row select {

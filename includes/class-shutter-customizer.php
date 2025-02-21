@@ -111,7 +111,7 @@ class ShutterCustomizer
         $column_exists_recess_depth = $wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE 'recess_depth'");
 
         if (is_null($column_exists_panes)) {
-            // Tambahkan kolom 'panes' jika belum ada
+            // Add 'panes' column if it doesn't exist
             $sql = "ALTER TABLE $table_name ADD `panes` INT(11) DEFAULT NULL";
             $wpdb->query($sql);
 
@@ -121,7 +121,7 @@ class ShutterCustomizer
         }
 
         if (is_null($column_exists_recess_depth)) {
-            // Tambahkan kolom 'recess_depth' jika belum ada
+            // Add 'recess_depth' column if it doesn't exist
             $sql = "ALTER TABLE $table_name ADD `recess_depth` VARCHAR(255) DEFAULT NULL";
             $wpdb->query($sql);
 
@@ -143,7 +143,7 @@ class ShutterCustomizer
         total_price decimal(10,2) DEFAULT NULL,
         status varchar(255) DEFAULT 'pending',
         date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-         panes VARCHAR(255) DEFAULT NULL,
+        panes VARCHAR(255) DEFAULT NULL,
         recess_depth VARCHAR(255) DEFAULT NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
@@ -151,7 +151,8 @@ class ShutterCustomizer
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        // Periksa jika terjadi error
+
+        // Check if there is an error
         if (! empty($wpdb->last_error)) {
             error_log('Error creating table: ' . $wpdb->last_error);
         }

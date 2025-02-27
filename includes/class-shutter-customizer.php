@@ -82,14 +82,14 @@ class ShutterCustomizer
         global $post;
         if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'shutter_quote_form')) {
             // Enqueue Style
-            wp_enqueue_style('shutter-quote-form-style', plugin_dir_url(__FILE__) . '../assets/css/quote-form.css');
+            wp_enqueue_style('shutter-quote-form-style', plugin_dir_url(__FILE__) . '../assets/css/output.css');
 
             // Enqueue Script
             wp_enqueue_script('shutter-quote-script', plugin_dir_url(__FILE__) . '../assets/js/quote-script.js', array('jquery'), null, true);
 
             // Pass AJAX data to JavaScript for quote form
             wp_localize_script(
-                'shutter-quote-script', // Handle yang harus sesuai
+                'shutter-quote-script', // Handle that must match
                 'shutter_ajax_params',
                 array(
                     'ajax_url' => admin_url('admin-ajax.php'),
@@ -100,35 +100,12 @@ class ShutterCustomizer
         }
     }
 
-    // Fungsi untuk membuat tabel saat plugin diaktifkan
+    // Create table when plugin is activated
     public static function plugin_activate()
     {
         global $wpdb;
         $table_name = $wpdb->prefix . 'shutter_quotes';
         $charset_collate = $wpdb->get_charset_collate();
-
-        $column_exists_panes = $wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE 'panes'");
-        $column_exists_recess_depth = $wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE 'recess_depth'");
-
-        if (is_null($column_exists_panes)) {
-            // Add 'panes' column if it doesn't exist
-            $sql = "ALTER TABLE $table_name ADD `panes` INT(11) DEFAULT NULL";
-            $wpdb->query($sql);
-
-            if (!empty($wpdb->last_error)) {
-                error_log('Error adding column `panes`: ' . $wpdb->last_error);
-            }
-        }
-
-        if (is_null($column_exists_recess_depth)) {
-            // Add 'recess_depth' column if it doesn't exist
-            $sql = "ALTER TABLE $table_name ADD `recess_depth` VARCHAR(255) DEFAULT NULL";
-            $wpdb->query($sql);
-
-            if (!empty($wpdb->last_error)) {
-                error_log('Error adding column `recess_depth`: ' . $wpdb->last_error);
-            }
-        }
 
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id int(11) NOT NULL AUTO_INCREMENT,
@@ -137,20 +114,19 @@ class ShutterCustomizer
         width int(11) DEFAULT NULL,
         height int(11) DEFAULT NULL,
         frame varchar(255) DEFAULT NULL,
+        panes int(11) DEFAULT NULL,
         color varchar(255) DEFAULT NULL,
         layout varchar(255) DEFAULT NULL,
         recess varchar(255) DEFAULT NULL,
+        recess_depth varchar(255) DEFAULT NULL,
         total_price decimal(10,2) DEFAULT NULL,
         status varchar(255) DEFAULT 'pending',
         date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        panes VARCHAR(255) DEFAULT NULL,
-        recess_depth VARCHAR(255) DEFAULT NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
-
 
         // Check if there is an error
         if (! empty($wpdb->last_error)) {

@@ -20,7 +20,7 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         if (response.success) {
           alert(response.data.message);
-          window.location.href = shutter_ajax_params.home_url;
+          window.location.reload();
         } else {
           alert("Error: " + response.data.message);
         }
@@ -30,6 +30,23 @@ jQuery(document).ready(function ($) {
         alert("Terjadi kesalahan saat mengirim formulir.");
       },
     });
+  });
+
+  // --------------------------------------------------------------------------
+  // Summary
+  // --------------------------------------------------------------------------
+
+  function updateSummary() {
+    var windowName = $("#quote_window_name").val();
+    var price = $("#quote_price").val();
+
+    $("#summary-window-name").text(windowName ? windowName : "");
+    $("#summary-price").text(price ? price : "");
+  }
+
+  // Event listener untuk perubahan input window name
+  $("#quote_window_name").on("input", function () {
+    updateSummary();
   });
 
   // --------------------------------------------------------------------------
@@ -58,19 +75,21 @@ jQuery(document).ready(function ($) {
     $("#quote_price").val("$" + totalPrice);
   }
 
-  $("#quote_width, #quote_height").on("input", function () {
-    calculateAndUpdate();
-  });
   // Sidebar Tab Click
   $(".sidebar .step").click(function () {
     var stepNumber = $(this).data("step");
-    $(".form-step.active").removeClass("active");
-    $('.form-step[data-step="' + stepNumber + '"]').addClass("active");
 
-    $(".sidebar .step.active").removeClass("active");
-    $(this).addClass("active");
+    // Hide all form steps first
+    $(".form-step").addClass("hidden");
 
-    // Update kalkulasi (jika ada)
+    // Show only the clicked step
+    $('.form-step[data-step="' + stepNumber + '"]').removeClass("hidden");
+
+    // Update sidebar active state
+    $(".sidebar .step.active").removeClass("active bg-[#F1EBE6]");
+    $(this).addClass("active bg-[#F1EBE6]");
+
+    // Calculate and update
     calculateAndUpdate();
   });
 
@@ -80,14 +99,20 @@ jQuery(document).ready(function ($) {
 
   // Marks the step as complete in the sidebar.
   function markStepAsCompleted(stepNumber) {
-    $('.sidebar .step[data-step="' + stepNumber + '"]').addClass("completed");
+    $('.sidebar .step[data-step="' + stepNumber + '"] .step-check').addClass(
+      "inline"
+    );
+  }
+
+  function markStepAsIncomplete(stepNumber) {
+    $('.sidebar .step[data-step="' + stepNumber + '"] .step-check').removeClass(
+      "inline"
+    );
   }
 
   // Validates a single form-step
   function validateStep(step) {
     var isValid = true;
-
-    console.log("Validating step:", step.data("step"));
 
     // Validate text and select inputs
     step.find("input[required], select[required]").each(function () {
@@ -112,7 +137,10 @@ jQuery(document).ready(function ($) {
         }
       });
 
-    console.log("Step", step.data("step"), "is valid:", isValid);
+    if (!isValid) {
+      markStepAsIncomplete(step.data("step"));
+    }
+
     return isValid;
   }
 
@@ -122,22 +150,23 @@ jQuery(document).ready(function ($) {
     var nextStep = currentStep.next(".form-step");
     var stepNumber = currentStep.data("step");
 
-    console.log("Next button clicked, validating step:", stepNumber); // Tambahkan ini
+    console.log("Next button clicked, validating step:", stepNumber);
 
     if (validateStep(currentStep)) {
-      console.log("Step", stepNumber, "is valid"); // Tambahkan ini
+      console.log("Step", stepNumber, "is valid");
       markStepAsCompleted(stepNumber);
-      currentStep.removeClass("active");
-      nextStep.addClass("active");
+      currentStep.addClass("hidden");
+      nextStep.removeClass("hidden");
 
-      $(".sidebar .step.active").removeClass("active");
+      $(".sidebar .step.active").removeClass("active bg-[#F1EBE6]");
       $('.sidebar .step[data-step="' + nextStep.data("step") + '"]').addClass(
-        "active"
+        "active bg-[#F1EBE6]"
       );
 
       calculateAndUpdate();
+      updateSummary();
     } else {
-      console.log("Step", stepNumber, "is NOT valid"); // Tambahkan ini
+      console.log("Step", stepNumber, "is NOT valid");
       alert("Please fill in all required fields.");
     }
   });
@@ -146,12 +175,15 @@ jQuery(document).ready(function ($) {
     var currentStep = $(this).closest(".form-step");
     var prevStep = currentStep.prev(".form-step");
 
-    currentStep.removeClass("active");
-    prevStep.addClass("active");
+    currentStep.addClass("hidden");
+    prevStep.removeClass("hidden");
 
-    var stepNumber = prevStep.data("step");
-    $(".sidebar .step.active").removeClass("active");
-    $('.sidebar .step[data-step="' + stepNumber + '"]').addClass("active");
+    let stepNumber = prevStep.data("step");
+
+    $(".sidebar .step.active").removeClass("active bg-[#F1EBE6]");
+    $('.sidebar .step[data-step="' + stepNumber + '"]').addClass(
+      "active bg-[#F1EBE6]"
+    );
 
     calculateAndUpdate();
   });
@@ -161,9 +193,17 @@ jQuery(document).ready(function ($) {
   // --------------------------------------------------------------------------
   $(".form-step").each(function () {
     var currentStep = $(this);
+
     if (validateStep(currentStep)) {
       markStepAsCompleted(currentStep.data("step"));
     }
+
+    // Add background color to active step
+    $(".step.active").addClass("bg-[#F1EBE6]");
+
+    $("#quote_width, #quote_height").on("input", function () {
+      calculateAndUpdate();
+    });
   });
 
   // --------------------------------------------------------------------------
@@ -194,29 +234,34 @@ jQuery(document).ready(function ($) {
   // --------------------------------------------------------------------------
   // Color Options
   // --------------------------------------------------------------------------
-  $('input[name="quote_recess"]').change(function () {
-    if ($(this).val() === "yes") {
-      $(".conditional-recess-depth").slideDown();
-    } else {
-      $(".conditional-recess-depth").slideUp();
-    }
+  $(".color-option").on("click", function () {
+    // Get the color value from the data attribute
+    var colorValue = $(this).data("value");
+
+    // Update the quote_color input field
+    $("#quote_color").val(colorValue);
+
+    // Remove outline-primary class from all color-option-preview elements
+    $(".color-option-preview").removeClass("outline-primary outline-2");
+
+    // Add outline-primary class to the clicked color option's preview
+    $(this).find(".color-option-preview").addClass("outline-primary outline-2");
   });
 
   // --------------------------------------------------------------------------
-  // Color Options
+  // Layout Options
   // --------------------------------------------------------------------------
-  $(".color-option").on("click", function () {
-    const $this = $(this);
-    const isCurrentlySelected = $this.hasClass("selected");
+  $('input[name="quote_layout"]').click(function () {
+    $(".layout-option").removeClass("outline-primary outline-2");
+    $(this).closest(".layout-option").addClass("outline-primary outline-2");
+  });
 
-    if (isCurrentlySelected) {
-      $this.removeClass("selected");
-      $("#quote_color").val("");
-    } else {
-      $(".color-option").removeClass("selected");
-      $this.addClass("selected");
-      $("#quote_color").val($this.data("value"));
-    }
+  // --------------------------------------------------------------------------
+  // Frame Options
+  // --------------------------------------------------------------------------
+  $(".frame-option").on("click", function () {
+    $(".frame-option").removeClass("outline-primary outline-2");
+    $(this).addClass("outline-primary outline-2");
   });
 
   // --------------------------------------------------------------------------
